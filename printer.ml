@@ -15,7 +15,7 @@ let rec output_value outc (expr : Types.expr) =
   | Float x    -> printf "%f" x
 *)
   | List l     -> print_list outc l
-  | If (p, c, a)     -> printf "IF STATEMENT"
+  | If (p, c, a)     -> print_list outc [Types.Symbol "if"; p; c; a;]
 
 and print_list outc arr =
   Out_channel.output_string outc "(";

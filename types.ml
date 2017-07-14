@@ -16,6 +16,7 @@ type expr =
 (*   | String of string *)
   | List of expr List.t
   | If of expr * expr * expr
+  | Define of symbol * expr
 
 type env = (expr String.Map.t) List.t
 

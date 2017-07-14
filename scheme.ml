@@ -34,26 +34,40 @@ let new_env () =
 
 let rec eval env (expr : Types.expr) =
   match expr with
-  | Atom a -> expr
-  | Symbol s -> lookup_symbol env s
-  | Func f -> expr
+  | Atom a -> env, expr
+  | Symbol s -> env, lookup_symbol env s
+  | Func f -> env, expr
   | If (pred, consq, alt) ->
-    (match eval env pred with
+    (let env, expr = eval env pred in
+     match expr with
     | Atom (Bool b) ->
       if b then eval env consq else eval env alt
     | _ -> failwith "pred not bool")
+  | Define (sym, expr) -> 
+    let env, value = eval env expr in
+    (match env with
+    | [] -> failwith "No environment"
+    | hd :: tl -> 
+    let env = String.Map.add hd ~key:sym ~data:value in
+    (env :: tl), Types.Symbol sym)
   | List exprs -> 
-    List.map exprs ~f:(eval env)
-    |> apply
+    let env, (vals : Types.expr List.t) = 
+    List.fold exprs ~init:(env,[]) 
+      ~f:(fun (env, vals) expr ->
+          let env, value = eval env expr in
+          env, (value :: vals)) 
+    in 
+    env, apply (List.rev vals)
+
 and apply (exprs : Types.expr List.t) =  
   match exprs with
   | hd :: tl ->
     (
       match hd with
       | Func f -> f tl 
-      | _ -> failwith "deal later"
+      | _ -> failwith "deal later in apply 1"
     )
-  | [] -> failwith "deal later!"
+  | [] -> failwith "deal later in apply 2"
 
 ;;
 
