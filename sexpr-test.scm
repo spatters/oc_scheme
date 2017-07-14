@@ -6,3 +6,11 @@
 (- 1 2 3)
 #t
 #f
+(and #t #f)
+(and #f #t)
+(and #t #t)
+(and #f #f)
+(or #t #f)
+(or #f #t)
+(or #t #t)
+(or #f #f)

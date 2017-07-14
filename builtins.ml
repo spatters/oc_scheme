@@ -28,6 +28,20 @@ let rec equal (exprs : Types.expr List.t) : bool =
   | _ -> failwith "equals called with wrong number of arguments"
 ;;
 
+let rec logical_and (exprs : Types.expr List.t) : bool =
+  match exprs with
+  | [] -> true
+  | Atom (Bool b) :: tl -> b && logical_and tl
+  | _ :: tl -> logical_and tl
+;;
+
+let rec logical_or (exprs : Types.expr List.t) : bool =
+  match exprs with
+  | [] -> false
+  | Atom (Bool b) :: tl -> b || logical_and tl
+  | _ -> false
+;;
+
 let rec compare ~cmp (exprs : Types.expr List.t) =
   match exprs with
   | [] -> true
@@ -35,9 +49,7 @@ let rec compare ~cmp (exprs : Types.expr List.t) =
   | (Atom (Int i1)) :: (Atom (Int i2)) :: tl ->
     (cmp i1 i2) && (compare ~cmp (Atom (Int i2) :: tl))
 | _ -> failwith "invalid arguments"
-
-
-
+;;
 
 (* let int_to_expr f ints = Types.Func (Types.Atom (Types.Int (f ints))) *)
 
@@ -57,6 +69,8 @@ let new_env () =
     |> String.Map.add ~key:"+"      ~data:(int_to_expr plus)
     |> String.Map.add ~key:"-"      ~data:(int_to_expr minus)
     |> String.Map.add ~key:"equal?" ~data:(bool_to_expr equal)
+    |> String.Map.add ~key:"and"    ~data:(bool_to_expr logical_and)
+    |> String.Map.add ~key:"or"     ~data:(bool_to_expr logical_or)
     |> String.Map.add ~key:"<"      ~data:(bool_to_expr less_than)
     |> String.Map.add ~key:"<="     ~data:(bool_to_expr less_than_equal_to)
     |> String.Map.add ~key:">"      ~data:(bool_to_expr greater_than)
