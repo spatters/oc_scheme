@@ -15,6 +15,7 @@ type expr =
   | Func of (expr List.t -> expr)
 (*   | String of string *)
   | List of expr List.t
+  | If of expr * expr * expr
 
 type env = (expr String.Map.t) List.t
 

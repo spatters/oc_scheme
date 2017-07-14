@@ -7,6 +7,7 @@
 (* %token<string> STRING *)
 %token LEFT_PAREN
 %token RIGHT_PAREN
+%token IF
 %token EOF
 
 
@@ -23,6 +24,8 @@ expr:
   (* | f = FLOAT { Scheme.Float f } *)
   | s = SYMBOL { Types.Symbol s }
   (* | s = STRING { Scheme.String s } *)
+  | LEFT_PAREN; IF; pred = expr; consq = expr; alt = expr; RIGHT_PAREN
+    { Types.If (pred, consq, alt) }
   | LEFT_PAREN; expr_list = process_list; RIGHT_PAREN
     { Types.List expr_list }
 ;

@@ -37,6 +37,11 @@ let rec eval env (expr : Types.expr) =
   | Atom a -> expr
   | Symbol s -> lookup_symbol env s
   | Func f -> expr
+  | If (pred, consq, alt) ->
+    (match eval env pred with
+    | Atom (Bool b) ->
+      if b then eval env consq else eval env alt
+    | _ -> failwith "pred not bool")
   | List exprs -> 
     List.map exprs ~f:(eval env)
     |> apply

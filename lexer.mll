@@ -18,17 +18,19 @@ let symbol_chars = ['a'-'z' 'A'-'Z' '0'-'9' '_' '-' '?' '+' '*' '/' '%']
 let symbol = symbol_chars+
 let string = '"' [^ '"']* '"'
 
+
 rule read =
   parse
   | white    { read lexbuf }
   | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
-
-  (* | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) } *)
-  | symbol    { SYMBOL (Lexing.lexeme lexbuf) }
-  (* | string    { STRING (Lexing.lexeme lexbuf) } *)
   | "#t"   { BOOL(true) }
   | "#f"  { BOOL(false) } 
   | '('      { LEFT_PAREN }
   | ')'      { RIGHT_PAREN }
-  | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | "if"      { IF }
+
+  (* | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) } *)
+  | symbol    { SYMBOL (Lexing.lexeme lexbuf) }
+  (* | string    { STRING (Lexing.lexeme lexbuf) } *)
   | eof      { EOF }
+  | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }

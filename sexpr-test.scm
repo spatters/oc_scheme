@@ -14,3 +14,7 @@
 (or #f #t)
 (or #t #t)
 (or #f #f)
+(equal? 1 1)
+(equal? 1 2)
+(if #t 1 0)
+(if #f 1 0)
