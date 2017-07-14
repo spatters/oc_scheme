@@ -1,13 +1,16 @@
 %token<int> INT
+
+(*
 %token<float> FLOAT
 %token<string> SYMBOL
 %token<string> STRING
+*)
 %token LEFT_PAREN
 %token RIGHT_PAREN
 %token EOF
 
 
-%start <Scheme.expr option> prog
+%start <Types.expr option> prog
 %%
 
 prog:
@@ -15,12 +18,14 @@ prog:
   | e = expr { Some e}
 
 expr:
-  | i = INT { Scheme.Int i }
+  | i = INT { Types.Atom (Types.Int i) }
+(*
   | f = FLOAT { Scheme.Float f }
   | s = SYMBOL { Scheme.Symbol s }
   | s = STRING { Scheme.String s }
+*)
   | LEFT_PAREN; expr_list = process_list; RIGHT_PAREN
-    { Scheme.List expr_list }
+    { Types.List expr_list }
 ;
 
 process_list: expr_list = rev_process_list { List.rev expr_list };

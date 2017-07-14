@@ -1,26 +1,15 @@
 open Core
 
-type expr =
-  | Int of int
-  | Float of float
-  | Symbol of string
-  | String of string
-  | List of expr list 
+let rec lookup_symbol env symbol =
+  match env with
+  | [] -> failwith "Unknown symbol"
+  | hd :: tl -> 
+    match String.Map.find hd symbol with
+    | None -> lookup_symbol tl symbol
+    | Some e -> e
+;;
 
-let rec output_value outc = function
-  | Int i      -> printf "INT %d" i
-  | Float x    -> printf "FLOAT %f" x
-  | Symbol s   -> printf "SYMBOL %s" s
-  | String s   -> printf "STRING %s" s
-  | List l     -> print_list outc l
 
-and print_list outc arr =
-  output_string outc "LIST (";
-  List.iteri ~f:(fun i v ->
-      if i > 0 then
-        output_string outc " ";
-      output_value outc v) arr;
-  output_string outc ")"
 
 (*
   | Symbol of string
