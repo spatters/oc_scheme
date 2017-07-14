@@ -21,3 +21,12 @@ type expr =
 
 type env = (expr String.Map.t) List.t
 
+let int_to_expr i = Atom (Int i)
+
+let expr_to_int e = 
+  match e with
+  | Atom (Int i) -> i
+  | _ -> failwith "Can't convert non-int"
+
+let func_to_expr f = Func f
+
