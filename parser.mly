@@ -1,10 +1,9 @@
 %token<int> INT
 
-(*
-%token<float> FLOAT
+
+(* %token<float> FLOAT *)
 %token<string> SYMBOL
-%token<string> STRING
-*)
+(* %token<string> STRING *)
 %token LEFT_PAREN
 %token RIGHT_PAREN
 %token EOF
@@ -19,11 +18,10 @@ prog:
 
 expr:
   | i = INT { Types.Atom (Types.Int i) }
-(*
-  | f = FLOAT { Scheme.Float f }
-  | s = SYMBOL { Scheme.Symbol s }
-  | s = STRING { Scheme.String s }
-*)
+
+  (* | f = FLOAT { Scheme.Float f } *)
+  | s = SYMBOL { Types.Symbol s }
+  (* | s = STRING { Scheme.String s } *)
   | LEFT_PAREN; expr_list = process_list; RIGHT_PAREN
     { Types.List expr_list }
 ;
