@@ -25,22 +25,24 @@ let rec parse_and_print ~env lexbuf =
     parse_and_print ~env lexbuf
   | None -> ()
 
+(*
 let new_env () =
   let plus nums : Types.expr = 
     (List.fold nums ~init:0 
       ~f:(fun accum expr -> accum + (Types.expr_to_int expr)) 
-    |> Types.int_to_expr ) 
+    |> Types.Int |> Types.Atom)
   in 
-  let plus_func = Types.func_to_expr plus in 
+  let plus_func = Types.Func plus in 
   let built_in_funcs =
     String.Map.empty
     |> String.Map.add ~key:"+" ~data:plus_func
   in
   [ built_in_funcs ]
 ;;
+*)
 
 let loop filename () =
-  let env = new_env () in 
+  let env = Builtins.new_env () in 
   let inx = In_channel.create filename in
   let lexbuf = Lexing.from_channel inx in
   lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };

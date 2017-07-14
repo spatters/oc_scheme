@@ -1,4 +1,5 @@
 %token<int> INT
+%token<bool> BOOL
 
 
 (* %token<float> FLOAT *)
@@ -18,7 +19,7 @@ prog:
 
 expr:
   | i = INT { Types.Atom (Types.Int i) }
-
+  | b = BOOL { Types.Atom (Types.Bool b) }
   (* | f = FLOAT { Scheme.Float f } *)
   | s = SYMBOL { Types.Symbol s }
   (* | s = STRING { Scheme.String s } *)
