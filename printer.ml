@@ -7,10 +7,11 @@ let output_atom outc (atom : Types.atom) =
 let rec output_value outc (expr : Types.expr) = 
   match expr with
   | Atom a     -> output_atom outc a
+  | Func f     -> printf "FUNCTION"
+  | Symbol s   -> printf "%s" s
+
 (*
   | Float x    -> printf "%f" x
-  | Symbol s   -> printf "%s" s
-  j String s   -> printf "%s" s
 *)
   | List l     -> print_list outc l
 
