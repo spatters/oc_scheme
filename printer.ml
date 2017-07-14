@@ -16,6 +16,7 @@ let rec output_value outc (expr : Types.expr) =
 *)
   | List l     -> print_list outc l
   | If (p, c, a)     -> print_list outc [Types.Symbol "if"; p; c; a;]
+  | Define (s, expr) -> print_list outc [Types.Symbol "define"; Types.Symbol s; expr]
 
 and print_list outc arr =
   Out_channel.output_string outc "(";
