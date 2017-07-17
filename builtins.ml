@@ -1,6 +1,10 @@
 open Core
 
-
+let foldl1 f lst = match lst with
+  | [] -> failwith "Empty list"
+  | x :: xs -> List.fold_left lst ~init:x ~f:f
+;;
+  
 let plus nums = 
   List.fold nums ~init:0  ~f:(fun accum expr -> 
       accum + (Types.expr_to_int expr))
@@ -9,6 +13,11 @@ let plus nums =
 let minus nums = match nums with
   | [] -> 0
   | hd :: tl -> Types.expr_to_int hd - plus tl
+;;
+
+let mul nums = 
+  List.fold nums ~init:1  ~f:(fun accum expr -> 
+      accum * (Types.expr_to_int expr))
 ;;
 
 let rec equal (exprs : Types.expr List.t) : bool = 
@@ -67,6 +76,7 @@ let new_env () =
   let built_in_funcs =
     String.Map.empty
     |> String.Map.add ~key:"+"      ~data:(int_to_expr plus)
+    |> String.Map.add ~key:"*"      ~data:(int_to_expr mul)
     |> String.Map.add ~key:"-"      ~data:(int_to_expr minus)
     |> String.Map.add ~key:"equal?" ~data:(bool_to_expr equal)
     |> String.Map.add ~key:"and"    ~data:(bool_to_expr logical_and)

@@ -29,6 +29,7 @@ rule read =
   | ')'      { RIGHT_PAREN }
   | "if"      { IF }
   | "define"      { DEFINE }
+  | "lambda"      { LAMBDA }
 
   (* | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) } *)
   | symbol    { SYMBOL (Lexing.lexeme lexbuf) }

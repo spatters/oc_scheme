@@ -32,24 +32,34 @@ let new_env () =
   [ built_in_funcs ]
 ;;
 
+
+let extend env names values = 
+  let frame_alist = List.zip_exn names values in
+  let frame_map = String.Map.of_alist_exn frame_alist in
+  frame_map :: env 
+
 let rec eval env (expr : Types.expr) =
   match expr with
   | Atom a -> env, expr
   | Symbol s -> env, lookup_symbol env s
   | Func f -> env, expr
+  | UserFunc (args, body, env) -> env, expr
   | If (pred, consq, alt) ->
-    (let env, expr = eval env pred in
-     match expr with
-    | Atom (Bool b) ->
-      if b then eval env consq else eval env alt
-    | _ -> failwith "pred not bool")
-  | Define (sym, expr) -> 
+    (let env, pred_val = eval env pred in
+     match pred_val with
+    | Atom (Bool false) -> eval env alt
+(*       if b then eval env consq else eval env alt *)
+    | _ -> eval env consq) (* only #f is false in scheme *)
+  | Lambda (args, body) -> env, UserFunc (args, body, env)
+  | Define (VarDef sym, expr) -> 
     let env, value = eval env expr in
     (match env with
     | [] -> failwith "No environment"
     | hd :: tl -> 
     let env = String.Map.add hd ~key:sym ~data:value in
     (env :: tl), Types.Symbol sym)
+  | Define (FuncDef (name, args), body) -> 
+    eval env (Define (VarDef name, Lambda (args, body)))
   | List exprs -> 
     let env, (vals : Types.expr List.t) = 
     List.fold exprs ~init:(env,[]) 
@@ -61,13 +71,13 @@ let rec eval env (expr : Types.expr) =
 
 and apply (exprs : Types.expr List.t) =  
   match exprs with
-  | hd :: tl ->
-    (
-      match hd with
-      | Func f -> f tl 
-      | _ -> failwith "deal later in apply 1"
-    )
-  | [] -> failwith "deal later in apply 2"
+  | (Func f) :: arg_vals -> f arg_vals
+  | (UserFunc (arg_names, body, env)) :: arg_vals ->
+     let func_env = extend env arg_names arg_vals in
+     let unused_env, return_val = eval func_env body in
+     return_val
+  | _ :: arg_vals -> failwith "First elt of list passed to apply is not a function"
+  | [] -> failwith "Empty list passed to apply"
 
 ;;
 

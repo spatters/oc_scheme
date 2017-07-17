@@ -3,12 +3,15 @@ open Core
 let output_atom outc (atom : Types.atom) = 
   match atom with
   | Int i -> printf "%d" i
-  | Bool b -> printf "%b" b
+  | Bool b -> match b with
+    | true -> printf "#t"
+    | false -> printf "#f"
 
 let rec output_value outc (expr : Types.expr) = 
   match expr with
   | Atom a         -> output_atom outc a
   | Func f         -> printf "FUNCTION"
+  | UserFunc (args, body, env)         -> printf "USER DEFINED FUNCTION"
   | Symbol s       -> printf "%s" s
 
 (*
@@ -16,7 +19,17 @@ let rec output_value outc (expr : Types.expr) =
 *)
   | List l     -> print_list outc l
   | If (p, c, a)     -> print_list outc [Types.Symbol "if"; p; c; a;]
-  | Define (s, expr) -> print_list outc [Types.Symbol "define"; Types.Symbol s; expr]
+  | Define (defn, expr) -> 
+    (match defn with
+    | Types.VarDef s -> 
+      print_list outc [Types.Symbol "define"; Types.Symbol s; expr]
+    | Types.FuncDef (name, args) -> 
+      print_list 
+        outc 
+        [Types.Symbol "define"; Types.List ([Types.Symbol name] @ List.map args (fun a -> Types.Symbol a)) ; expr])
+  | Lambda (args, expr) -> 
+    print_list outc [Types.Symbol "lambda"; Types.List (List.map args (fun a -> Types.Symbol a)); expr]
+
 
 and print_list outc arr =
   Out_channel.output_string outc "(";
