@@ -10,7 +10,6 @@ type expr =
   | Atom of atom
   | Symbol of symbol
   | Func of (expr List.t -> expr)
-(*   | UserFunc of symbol List.t * expr * env *)
   | UserFunc of user_func 
   | List of expr List.t
   | If of expr * expr * expr
@@ -27,7 +26,6 @@ and user_func =
   {arg_names : symbol List.t;
    body : expr List.t;
    mutable environment : env }
-
 
 let int_to_expr i = Atom (Int i)
 

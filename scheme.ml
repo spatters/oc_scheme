@@ -9,20 +9,6 @@ let rec lookup_symbol env symbol =
     | Some e -> e
 ;;
 
-
-
-(*
-  | Symbol of string
-  | Quote of expr
-  | Assignment of expr
-  | Definition of expr
-  | If of expr
-  | Lambda of expr
-  | Begin of expr
-  | Cond of expr
-  | Application of expr
-*)
-
 let new_env () =
   let plus nums = List.fold nums ~init:0 ~f:Int.(+) in
   let built_in_funcs =
@@ -31,7 +17,6 @@ let new_env () =
   in
   [ built_in_funcs ]
 ;;
-
 
 let extend env names values = 
   let frame_alist = List.zip_exn names values in
@@ -96,7 +81,6 @@ and eval_sequence env (exprs : Types.expr List.t) =
   | some_expr :: other_exprs ->
     let new_env, _ = eval env some_expr in
     eval_sequence new_env other_exprs
-
 ;;
 
 (* let () =  *)
