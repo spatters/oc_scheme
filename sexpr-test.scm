@@ -29,5 +29,13 @@ sq
 (sq 3)
 (lambda (x y) (+ x y))
 ((lambda (x y) (+ x y)) 4 5) 
+(define (add-foo x) (+ x foo))
 (define (fact n) (if (= n 1) 1 (* n (fact (- n 1)))))
-
+(fact 5)
+(define (fact n)
+ (define (fact-iter p c m)
+  (if (> c m)
+   p
+   (fact-iter (* p c) (+ c 1) m)))
+ (fact-iter 1 1 n))
+(fact 5)

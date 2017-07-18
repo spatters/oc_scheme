@@ -29,10 +29,10 @@ expr:
   | LEFT_PAREN; IF; pred = expr; consq = expr; alt = expr; RIGHT_PAREN
     { Types.If (pred, consq, alt) }
   | LEFT_PAREN; DEFINE; var = symbol; value = expr; RIGHT_PAREN
-    { Types.Define (Types.VarDef var, value) }
-  | LEFT_PAREN; DEFINE; LEFT_PAREN;  name = symbol; args = symbol_list; RIGHT_PAREN; body = expr; RIGHT_PAREN
-    { Types.Define (Types.FuncDef (name, args) , body) }
-  | LEFT_PAREN; LAMBDA; LEFT_PAREN; args = symbol_list; RIGHT_PAREN; body = expr; RIGHT_PAREN
+    { Types.Define (Types.VarDef (var, value)) }
+  | LEFT_PAREN; DEFINE; LEFT_PAREN;  name = symbol; args = symbol_list; RIGHT_PAREN; body = process_list; RIGHT_PAREN
+    { Types.Define (Types.FuncDef (name, args, body)) }
+  | LEFT_PAREN; LAMBDA; LEFT_PAREN; args = symbol_list; RIGHT_PAREN; body = process_list; RIGHT_PAREN
   { Types.Lambda (args, body) }
   | LEFT_PAREN; expr_list = process_list; RIGHT_PAREN
     { Types.List expr_list }
