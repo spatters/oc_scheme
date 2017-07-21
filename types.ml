@@ -7,16 +7,18 @@ type atom =
   | Bool of bool
 
 type expr =
+  | Nill
   | Atom of atom
   | Symbol of symbol
   | Func of (expr List.t -> expr)
   | UserFunc of user_func 
   | List of expr List.t
+  | Pair of expr * expr
   | If of expr * expr * expr
   | Define of definition 
   | Lambda of symbol List.t * expr List.t
 
-and env = (expr String.Map.t) List.t 
+and env = (expr String.Table.t) List.t 
   
 and definition = 
   | VarDef of symbol * expr
@@ -25,7 +27,7 @@ and definition =
 and user_func = 
   {arg_names : symbol List.t;
    body : expr List.t;
-   mutable environment : env }
+   environment : env }
 
 let int_to_expr i = Atom (Int i)
 

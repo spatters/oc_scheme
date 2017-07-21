@@ -20,6 +20,21 @@ let mul nums =
       accum * (Types.expr_to_int expr))
 ;;
 
+let cons e1 e2 = Types.Pair (e1, e2)
+
+let car expr = 
+  match expr with
+  | Types.Pair (e1, e2) -> e1
+  | _             -> failwith "Non pair passed to car"
+
+let cdr expr = 
+  match expr with
+  | Types.Pair (e1, e2) -> e2
+  | _             -> failwith "Non pair passed to cdr"
+
+let list_ exprs = 
+  List.fold_right exprs ~init:Types.Nill ~f:cons
+
 let rec equal (exprs : Types.expr List.t) : bool = 
   match exprs with
   | e1 :: e2 :: [] ->
@@ -33,6 +48,14 @@ let rec equal (exprs : Types.expr List.t) : bool =
        | _ :: _, [] | [], _ :: _ -> false
        | hd1 :: tl1, hd2 :: tl2 -> 
          (equal [hd1; hd2]) && (equal [Types.List tl1; Types.List tl2]))
+    | Pair (e11, e12), Pair (e21, e22) ->
+      (match (e11, e12), (e21, e22) with
+       | (e11, Types.Nill), (e21, Types.Nill) -> (equal [e11; e12])
+       | (Types.Nill, e12), (Types.Nill, e22) -> (equal [e12; e22])
+       | (_, Types.Nill), (Types.Nill, _) 
+       | (Types.Nill, _), (_, Types.Nill) -> false
+       | (e11, e12), (e21, e22) -> 
+         (equal [e11; e12]) && (equal [e12; e22]))
     | _, _ -> false)
   | _ -> failwith "equals called with wrong number of arguments"
 ;;
@@ -73,19 +96,17 @@ let greater_than_equal_to = compare ~cmp:Int.(>=)
 let equal_to              = compare ~cmp:Int.(=)
 
 let new_env () =
-  let built_in_funcs =
-    String.Map.empty
-    |> String.Map.add ~key:"+"      ~data:(int_to_expr plus)
-    |> String.Map.add ~key:"*"      ~data:(int_to_expr mul)
-    |> String.Map.add ~key:"-"      ~data:(int_to_expr minus)
-    |> String.Map.add ~key:"equal?" ~data:(bool_to_expr equal)
-    |> String.Map.add ~key:"and"    ~data:(bool_to_expr logical_and)
-    |> String.Map.add ~key:"or"     ~data:(bool_to_expr logical_or)
-    |> String.Map.add ~key:"<"      ~data:(bool_to_expr less_than)
-    |> String.Map.add ~key:"<="     ~data:(bool_to_expr less_than_equal_to)
-    |> String.Map.add ~key:">"      ~data:(bool_to_expr greater_than)
-    |> String.Map.add ~key:">="     ~data:(bool_to_expr greater_than_equal_to)
-    |> String.Map.add ~key:"="      ~data:(bool_to_expr equal_to)
-  in
-  [ built_in_funcs ]
+  let built_in_funcs = [
+    ("+"      ,(int_to_expr plus));
+    ("*"      ,(int_to_expr mul));
+    ("-"      ,(int_to_expr minus));
+    ("equal?" ,(bool_to_expr equal));
+    ("and"    ,(bool_to_expr logical_and));
+    ("or"     ,(bool_to_expr logical_or));
+    ("<"      ,(bool_to_expr less_than));
+    ("<="     ,(bool_to_expr less_than_equal_to));
+    (">"      ,(bool_to_expr greater_than));
+    (">="     ,(bool_to_expr greater_than_equal_to));
+    ("="      ,(bool_to_expr equal_to));] in 
+  [String.Table.of_alist_exn built_in_funcs]
 ;;
