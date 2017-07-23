@@ -46,3 +46,11 @@ sq
    (loop (+ c 1) n)))
  (loop 1 n))
 (tail-rec-test 10000)
+(define x 3)
+(set! x 5)
+x
+(define (f x)
+ (set! x 10)
+ x)
+(f x)
+x

@@ -16,6 +16,7 @@ type expr =
   | Pair of expr * expr
   | If of expr * expr * expr
   | Define of definition 
+  | Assign of definition 
   | Lambda of symbol List.t * expr List.t
 
 and env = (expr String.Table.t) List.t 

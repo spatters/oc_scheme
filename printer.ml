@@ -17,6 +17,11 @@ let rec output_value outc (expr : Types.expr) =
   | List l         -> print_list outc l
   | Pair (e1, e2)         -> print_pair outc e1 e2
   | If (p, c, a)   -> print_list outc [Types.Symbol "if"; p; c; a;]
+  | Assign defn  -> 
+    (match defn with
+     | Types.VarDef (s, expr) ->
+       print_list outc [Types.Symbol "set!"; Types.Symbol s; expr]
+     | Types.FuncDef _ -> failwith "can't assign FuncDef")
   | Define defn  -> 
     (match defn with
      | Types.VarDef (s, expr) ->

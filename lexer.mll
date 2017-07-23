@@ -22,17 +22,18 @@ let string = '"' [^ '"']* '"'
 rule read =
   parse
   | white    { read lexbuf }
-  | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | "#t"   { BOOL(true) }
   | "#f"  { BOOL(false) } 
   | '('      { LEFT_PAREN }
   | ')'      { RIGHT_PAREN }
   | "if"      { IF }
   | "define"      { DEFINE }
+  | "set!"      { ASSIGN }
   | "lambda"      { LAMBDA }
 
-  (* | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) } *)
+  | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
   | symbol    { SYMBOL (Lexing.lexeme lexbuf) }
-  (* | string    { STRING (Lexing.lexeme lexbuf) } *)
   | eof      { EOF }
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  (* | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) } *)
+  (* | string    { STRING (Lexing.lexeme lexbuf) } *)

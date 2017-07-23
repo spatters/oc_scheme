@@ -16,27 +16,28 @@ let parse_with_error lexbuf =
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
-(* part 1 *)
 let rec parse_and_print ~env lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
     printf "%a =>  " Printer.output_value value;
-    let value = Scheme.eval env value in
+    let value = Eval.eval env value in
     printf "%a \n" Printer.output_value value;
+    Out_channel.flush stdout;
     parse_and_print ~env lexbuf
   | None -> ()
 
-let loop filename () =
+let main filename () =
   let env = Builtins.new_env () in 
-  let inx = In_channel.create filename in
+  let inx, pos_fname  = (match filename with
+    | Some filename -> (In_channel.create filename), filename
+    | None -> In_channel.stdin, "stdin") in
   let lexbuf = Lexing.from_channel inx in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = pos_fname };
   parse_and_print ~env lexbuf;
   In_channel.close inx
 
-(* part 2 *)
 let () =
   Command.basic ~summary:"Parse and display Sexp"
-    Command.Spec.(empty +> anon ("filename" %: file))
-   loop
+    Command.Spec.(empty +> anon (maybe ("filename" %: file)))
+   main
   |> Command.run

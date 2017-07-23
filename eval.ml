@@ -7,16 +7,14 @@ let rec lookup_symbol env name =
     match String.Table.find hd name with
     | None -> lookup_symbol tl name
     | Some e -> e
-;;
 
 let rec assign_variable env name value =
   match env with
   | [] -> failwith "Unknown symbol"
   | frame :: tl -> 
     match String.Table.find frame name with
-    | None -> lookup_symbol tl name
+    | None -> assign_variable tl name value
     | Some e -> String.Table.set frame ~key:name ~data:value
-;;
 
 let extend env names values = 
   let frame_alist = List.zip_exn names values in
@@ -34,27 +32,25 @@ let rec eval env (expr : Types.expr) =
   | Atom a -> expr
   | Symbol s -> lookup_symbol env s
   | Func f -> expr
-(*   | UserFunc (args, body, env) -> env, expr *)
   | UserFunc _ -> expr
   | If (pred, consq, alt) ->
      (match eval env pred with
     | Atom (Bool false) -> eval env alt
-(*       if b then eval env consq else eval env alt *)
     | _ -> eval env consq) (* only #f is false in scheme *)
-(*   | Lambda (args, body) -> env, UserFunc (args, body, env) *)
   | Lambda (arg_names, body) -> UserFunc {arg_names; body; environment=env}
   | Define VarDef (sym, expr) -> 
     let value = eval env expr in
     define_variable env sym value;
     Types.Symbol sym
-(*
-  | Define (FuncDef (name, args), body) -> 
-    eval env (Define (VarDef name, Lambda (args, body)))
-*)
   | Define FuncDef (name, arg_names, (body : Types.expr List.t)) ->
     let user_func_struct = ({arg_names; body; environment=env} : Types.user_func) in 
     let user_func = Types.UserFunc user_func_struct in
     eval env (Define (VarDef (name, user_func))) 
+  | Assign VarDef (sym, expr) ->
+    let value = eval env expr in
+    assign_variable env sym value;
+    Types.Symbol sym
+  | Assign FuncDef _ -> failwith "Can't assign a FuncDef."
   | Pair (e1, e2) ->
     let val1 = eval env e1 in 
     Pair (val1, eval env e2) 
@@ -83,19 +79,3 @@ and eval_sequence env (exprs : Types.expr List.t) =
   | some_expr :: other_exprs ->
     let _ = eval env some_expr in 
     eval_sequence env other_exprs
-;;
-
-(* let () =  *)
-  (* let env = new_env () in *)
-  (* while true do  *)
-  (*   Out_channel.output_string stdout ">: "; *)
-  (*   Out_channel.flush stdout; *)
-  (*   match In_channel.input_line In_channel.stdin with *)
-  (*   | None -> failwith "No input" *)
-  (*   | Some input_str ->  *)
-  (*     Parser. *)
-  (*     Out_channel.output_string stdout  *)
-  (*       (String.concat  *)
-  (*          [">: "; input_str; "\n"]); *)
-  (*     Out_channel.flush stdout; *)
-  (* done *)
