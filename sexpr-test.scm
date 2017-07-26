@@ -4,6 +4,7 @@
 (+ (+ 3 4) (+ 3 5))
 (+ 2 4 5)
 (- 1 2 3)
+(- 5 1)
 #t
 #f
 (and #t #f)
@@ -14,6 +15,12 @@
 (or #f #t)
 (or #t #t)
 (or #f #f)
+(or #f #t #f)
+(or #t)
+(and 1 2 3)
+(or 1 #f 3)
+(and)
+(or)
 (equal? 1 1)
 (equal? 1 2)
 (if #t 1 0)
@@ -53,4 +60,11 @@ x
  (set! x 10)
  x)
 (f x)
-x
+(quote foo)
+'foobar
+(list 1 2 3)
+(list (list + 4 5) (list - 3 4))
+(list)
+'()
+(equal? 'x 'x)
+(equal? 'x 'y)

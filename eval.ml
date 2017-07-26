@@ -1,54 +1,28 @@
 open Core
 
-let rec lookup_symbol env name =
-  match env with
-  | [] -> failwith "Unknown symbol"
-  | hd :: tl -> 
-    match String.Table.find hd name with
-    | None -> lookup_symbol tl name
-    | Some e -> e
-
-let rec assign_variable env name value =
-  match env with
-  | [] -> failwith "Unknown symbol"
-  | frame :: tl -> 
-    match String.Table.find frame name with
-    | None -> assign_variable tl name value
-    | Some e -> String.Table.set frame ~key:name ~data:value
-
-let extend env names values = 
-  let frame_alist = List.zip_exn names values in
-  let frame_map = String.Table.of_alist_exn frame_alist in
-  frame_map :: env 
-
-let define_variable env name value = 
-  (match env with
-   | [] -> failwith "No environment can't define variable"
-   | frame :: tl -> String.Table.set frame ~key:name ~data:value)
-
-let rec eval env (expr : Types.expr) =
+let rec eval (env : Types.expr Environment.t) (expr : Types.expr) =
   match expr with
   | Nill -> expr
   | Atom a -> expr
-  | Symbol s -> lookup_symbol env s
-  | Func f -> expr
-  | UserFunc _ -> expr
+  | Quote quote -> quote
+  | Symbol s -> Environment.lookup_variable env s
+  | Func (_,_) as func -> func
+  | UserFunc (_,_,_,_) as user_func -> user_func
   | If (pred, consq, alt) ->
      (match eval env pred with
     | Atom (Bool false) -> eval env alt
     | _ -> eval env consq) (* only #f is false in scheme *)
-  | Lambda (arg_names, body) -> UserFunc {arg_names; body; environment=env}
+  | Lambda (arg_names, body) -> UserFunc ("lambda", arg_names, body, env)
   | Define VarDef (sym, expr) -> 
     let value = eval env expr in
-    define_variable env sym value;
+    Environment.define_variable env sym value;
     Types.Symbol sym
   | Define FuncDef (name, arg_names, (body : Types.expr List.t)) ->
-    let user_func_struct = ({arg_names; body; environment=env} : Types.user_func) in 
-    let user_func = Types.UserFunc user_func_struct in
+    let user_func = Types.UserFunc (name, arg_names, body, env) in 
     eval env (Define (VarDef (name, user_func))) 
   | Assign VarDef (sym, expr) ->
     let value = eval env expr in
-    assign_variable env sym value;
+    Environment.assign_variable env sym value;
     Types.Symbol sym
   | Assign FuncDef _ -> failwith "Can't assign a FuncDef."
   | Pair (e1, e2) ->
@@ -65,9 +39,9 @@ let rec eval env (expr : Types.expr) =
 
 and apply (exprs : Types.expr List.t) =  
   match exprs with
-  | (Func f) :: arg_vals -> f arg_vals
-  | (UserFunc {arg_names; body; environment}) :: arg_vals ->
-     let func_env = extend environment arg_names arg_vals in
+  | (Func (name, f)) :: arg_vals -> f arg_vals
+  | (UserFunc (name, arg_names, body, env)) :: arg_vals ->
+     let func_env = Environment.extend env arg_names arg_vals in
      eval_sequence func_env body 
   | _ :: arg_vals -> failwith "First elt of list passed to apply is not a function"
   | [] -> failwith "Empty list passed to apply"

@@ -1,24 +1,9 @@
 open Core
 
-let foldl1 f lst = match lst with
-  | [] -> failwith "Empty list"
-  | x :: xs -> List.fold_left lst ~init:x ~f:f
-;;
-  
-let plus nums = 
-  List.fold nums ~init:0  ~f:(fun accum expr -> 
-      accum + (Types.expr_to_int expr))
-;;
-
-let minus nums = match nums with
-  | [] -> 0
-  | hd :: tl -> Types.expr_to_int hd - plus tl
-;;
-
-let mul nums = 
-  List.fold nums ~init:1  ~f:(fun accum expr -> 
-      accum * (Types.expr_to_int expr))
-;;
+(* built in int functions  *)
+let plus lst = List.fold lst ~f:(fun x y -> x + y) ~init:0
+let minus lst = 2 * List.hd_exn lst - (List.fold lst ~f:(fun x y -> x + y) ~init:0)
+let mul lst = List.fold lst ~f:(fun x y -> x * y) ~init:1
 
 let cons e1 e2 = Types.Pair (e1, e2)
 
@@ -32,8 +17,7 @@ let cdr expr =
   | Types.Pair (e1, e2) -> e2
   | _             -> failwith "Non pair passed to cdr"
 
-let list_ exprs = 
-  List.fold_right exprs ~init:Types.Nill ~f:cons
+let scheme_list (exprs : Types.expr List.t) = Types.List exprs
 
 let rec equal (exprs : Types.expr List.t) : bool = 
   match exprs with
@@ -41,7 +25,7 @@ let rec equal (exprs : Types.expr List.t) : bool =
     (match e1, e2 with
     | Atom (Int i1), Atom (Int i2) -> i1 = i2
     | Atom (Bool b1), Atom (Bool b2) -> b1 = b2
-(*     | Symbol s1, Symbol s1 -> s1 = s2 *)
+    | Symbol s1, Symbol s2 -> s1 = s2
     | List l1, List l2 ->
       (match l1, l2 with
        | [], [] -> true
@@ -58,36 +42,30 @@ let rec equal (exprs : Types.expr List.t) : bool =
          (equal [e11; e12]) && (equal [e12; e22]))
     | _, _ -> false)
   | _ -> failwith "equals called with wrong number of arguments"
-;;
 
-let rec logical_and (exprs : Types.expr List.t) : bool =
+let rec scheme_and (exprs : Types.expr List.t) : Types.expr =
   match exprs with
-  | [] -> true
-  | Atom (Bool b) :: tl -> b && logical_and tl
-  | _ :: tl -> logical_and tl
-;;
+  | [] -> Atom (Bool true)
+  | hd :: [] -> hd
+  | Atom (Bool false) :: tl -> Atom (Bool false)
+  | _ :: tl -> scheme_and tl
 
-let rec logical_or (exprs : Types.expr List.t) : bool =
+let rec scheme_or (exprs : Types.expr List.t) : Types.expr =
   match exprs with
-  | [] -> false
-  | Atom (Bool b) :: tl -> b || logical_and tl
-  | _ -> false
-;;
+  | [] -> Atom (Bool false)
+  | Atom (Bool false) :: tl -> scheme_or tl
+  | hd :: _ -> hd
 
 let rec compare ~cmp (exprs : Types.expr List.t) =
   match exprs with
   | [] -> true
-  | [ Atom (Int _) ] -> true
+  | [Atom (Int _)] -> true
   | (Atom (Int i1)) :: (Atom (Int i2)) :: tl ->
     (cmp i1 i2) && (compare ~cmp (Atom (Int i2) :: tl))
 | _ -> failwith "invalid arguments"
-;;
 
-(* let int_to_expr f ints = Types.Func (Types.Atom (Types.Int (f ints))) *)
-
-let int_to_expr f = Types.Func (fun ints -> Types.Atom (Types.Int (f ints)))
-
-let bool_to_expr f = Types.Func (fun exprs -> Types.Atom (Types.Bool (f exprs)))
+let bool_return_to_expr name f = Types.Func (name, (fun exprs -> Types.Atom (Types.Bool (f exprs))))
+let int_fn_to_expr_fn name f = Types.Func (name, (fun exprs -> Types.int_to_expr (f (List.map exprs Types.expr_to_int))))
 
 let less_than             = compare ~cmp:Int.(<)
 let less_than_equal_to    = compare ~cmp:Int.(<=)
@@ -95,18 +73,19 @@ let greater_than          = compare ~cmp:Int.(>)
 let greater_than_equal_to = compare ~cmp:Int.(>=)
 let equal_to              = compare ~cmp:Int.(=)
 
-let new_env () =
+let new_env () : Types.expr Environment.t = 
   let built_in_funcs = [
-    ("+"      ,(int_to_expr plus));
-    ("*"      ,(int_to_expr mul));
-    ("-"      ,(int_to_expr minus));
-    ("equal?" ,(bool_to_expr equal));
-    ("and"    ,(bool_to_expr logical_and));
-    ("or"     ,(bool_to_expr logical_or));
-    ("<"      ,(bool_to_expr less_than));
-    ("<="     ,(bool_to_expr less_than_equal_to));
-    (">"      ,(bool_to_expr greater_than));
-    (">="     ,(bool_to_expr greater_than_equal_to));
-    ("="      ,(bool_to_expr equal_to));] in 
-  [String.Table.of_alist_exn built_in_funcs]
+    ("+"      ,(int_fn_to_expr_fn "+" plus));
+    ("*"      ,(int_fn_to_expr_fn "*" mul));
+    ("-"      ,(int_fn_to_expr_fn "-" minus));
+    ("equal?" ,(bool_return_to_expr "equal?" equal));
+    ("<"      ,(bool_return_to_expr "<" less_than));
+    ("<="     ,(bool_return_to_expr "<=" less_than_equal_to));
+    (">"      ,(bool_return_to_expr ">" greater_than));
+    (">="     ,(bool_return_to_expr ">=" greater_than_equal_to));
+    ("="      ,(bool_return_to_expr "=" equal_to));
+    ("and"    ,Types.Func ("and", scheme_and));
+    ("or"     ,Types.Func ("or", scheme_or));
+    ("list"   ,Types.Func ("list", scheme_list));] in 
+  Environment.of_alist_exn built_in_funcs
 ;;

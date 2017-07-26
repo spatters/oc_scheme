@@ -26,9 +26,11 @@ rule read =
   | "#f"  { BOOL(false) } 
   | '('      { LEFT_PAREN }
   | ')'      { RIGHT_PAREN }
+  | '\''      { SINGLE_QUOTE }
   | "if"      { IF }
   | "define"      { DEFINE }
   | "set!"      { ASSIGN }
+  | "quote"     { QUOTE }
   | "lambda"      { LAMBDA }
 
   | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }

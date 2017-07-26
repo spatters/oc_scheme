@@ -6,6 +6,8 @@
 %token IF
 %token DEFINE
 %token ASSIGN
+%token QUOTE
+%token SINGLE_QUOTE
 %token LAMBDA
 %token EOF
 (* %token<float> FLOAT *)
@@ -28,6 +30,10 @@ expr:
     { Types.Define (Types.VarDef (var, value)) }
   | LEFT_PAREN; ASSIGN; var = symbol; value = expr; RIGHT_PAREN
     { Types.Assign (Types.VarDef (var, value)) }
+  | LEFT_PAREN; QUOTE; quoted_expr = expr; RIGHT_PAREN
+    { Types.Quote quoted_expr }
+  | SINGLE_QUOTE; quoted_expr = expr
+    { Types.Quote quoted_expr }
   | LEFT_PAREN; DEFINE; LEFT_PAREN;  name = symbol; args = symbol_list; RIGHT_PAREN; body = expr_list; RIGHT_PAREN
     { Types.Define (Types.FuncDef (name, args, body)) }
   | LEFT_PAREN; LAMBDA; LEFT_PAREN; args = symbol_list; RIGHT_PAREN; body = expr_list; RIGHT_PAREN

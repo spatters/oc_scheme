@@ -11,8 +11,9 @@ let rec output_value outc (expr : Types.expr) =
   match expr with
   | Nill           -> printf "()"
   | Atom a         -> output_atom outc a
-  | Func f         -> printf "FUNCTION"
-  | UserFunc _     -> printf "USER DEFINED FUNCTION"
+  | Quote q        -> print_list outc [Types.Symbol "quote"; q]
+  | Func (name, f)         -> printf "Func:%s" name
+  | UserFunc (name, _, _, _)     -> printf "UserFunc:%s " name
   | Symbol s       -> printf "%s" s
   | List l         -> print_list outc l
   | Pair (e1, e2)         -> print_pair outc e1 e2
