@@ -1,6 +1,6 @@
 # Scheme interpreter written in OCaml.
 
-Interpreter for a subset of R5RS scheme written purely to practice using OCaml. 
+Interpreter for a subset of R5RS scheme. Written purely to practice using OCaml. 
 
 Lexer and parser are generated using ocamllex and menhir, uses jbuilder to build.
 
@@ -28,7 +28,9 @@ Currently implemented:
 * Tail recursion (for free, thanks OCaml!)
 
 Still to do:
+* Proper tests
 * Derived syntax such as let / cond
+* More data types - floats, chars, strings, bignums
 * Macros
 * Continuations
 
