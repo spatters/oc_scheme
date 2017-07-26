@@ -6,6 +6,7 @@
 
 (executables
   ((names (repl))
+   (ocamlopt_flags (:standard -S))
   (libraries (core
   ))
   (preprocess (pps (ppx_jane ppx_driver.runner)))
