@@ -26,6 +26,7 @@ rule read =
   | "#f"  { BOOL(false) } 
   | '('      { LEFT_PAREN }
   | ')'      { RIGHT_PAREN }
+  | '.'      { DOT }
   | '\''      { SINGLE_QUOTE }
   | "if"      { IF }
   | "define"      { DEFINE }

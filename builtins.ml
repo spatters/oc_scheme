@@ -17,8 +17,6 @@ let cdr expr =
   | Types.Pair (e1, e2) -> e2
   | _             -> failwith "Non pair passed to cdr"
 
-let scheme_list (exprs : Types.expr List.t) = Types.List exprs
-
 let rec equal (exprs : Types.expr List.t) : bool = 
   match exprs with
   | e1 :: e2 :: [] ->
@@ -26,12 +24,6 @@ let rec equal (exprs : Types.expr List.t) : bool =
     | Atom (Int i1), Atom (Int i2) -> i1 = i2
     | Atom (Bool b1), Atom (Bool b2) -> b1 = b2
     | Symbol s1, Symbol s2 -> s1 = s2
-    | List l1, List l2 ->
-      (match l1, l2 with
-       | [], [] -> true
-       | _ :: _, [] | [], _ :: _ -> false
-       | hd1 :: tl1, hd2 :: tl2 -> 
-         (equal [hd1; hd2]) && (equal [Types.List tl1; Types.List tl2]))
     | Pair (e11, e12), Pair (e21, e22) ->
       (match (e11, e12), (e21, e22) with
        | (e11, Types.Nill), (e21, Types.Nill) -> (equal [e11; e12])
@@ -86,6 +78,7 @@ let new_env () : Types.expr Environment.t =
     ("="      ,(bool_return_to_expr "=" equal_to));
     ("and"    ,Types.Func ("and", scheme_and));
     ("or"     ,Types.Func ("or", scheme_or));
-    ("list"   ,Types.Func ("list", scheme_list));] in 
+    ("list"   ,Types.Func ("list", Types.scheme_list));
+    ("cons"   ,Types.Func ("cons", Types.cons));] in 
   Environment.of_alist_exn built_in_funcs
 ;;

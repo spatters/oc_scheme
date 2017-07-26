@@ -3,6 +3,7 @@
 %token<string> SYMBOL
 %token LEFT_PAREN
 %token RIGHT_PAREN
+%token DOT
 %token IF
 %token DEFINE
 %token ASSIGN
@@ -38,8 +39,10 @@ expr:
     { Types.Define (Types.FuncDef (name, args, body)) }
   | LEFT_PAREN; LAMBDA; LEFT_PAREN; args = symbol_list; RIGHT_PAREN; body = expr_list; RIGHT_PAREN
   { Types.Lambda (args, body) }
+  | LEFT_PAREN; expr_list_ = expr_list ; DOT ; last_expr = expr ; RIGHT_PAREN
+    { Types.dotted_list expr_list_ last_expr }
   | LEFT_PAREN; expr_list_ = expr_list ; RIGHT_PAREN
-    { Types.List expr_list_ }
+    { Types.scheme_list expr_list_ }
   | s = symbol {Types.Symbol s}
   (* | f = FLOAT { Types.Float f } *)
 (*   | s = SYMBOL { Types.Symbol s } *)

@@ -25,26 +25,20 @@ let rec eval (env : Types.expr Environment.t) (expr : Types.expr) =
     Environment.assign_variable env sym value;
     Types.Symbol sym
   | Assign FuncDef _ -> failwith "Can't assign a FuncDef."
-  | Pair (e1, e2) ->
-    let val1 = eval env e1 in 
-    Pair (val1, eval env e2) 
-  | List exprs -> 
-    let (vals : Types.expr List.t) = 
-      List.fold exprs ~init:[]
-      ~f:(fun vals expr ->
-          let value = eval env expr in
-          value :: vals)
-    in 
-    apply (List.rev vals)
+  | Pair (func_expr, arg_exprs) ->
+    let func_val = eval env func_expr in 
+    let arg_vals = list_of_values env arg_exprs in 
+    match (func_val, arg_vals) with
+    | (Func (name, f), arg_vals) -> f arg_vals
+    | (UserFunc (name, arg_names, body, env) as user_func, arg_vals) -> apply user_func arg_vals
+    | _ -> failwith "First element of combination is not applicable."
 
-and apply (exprs : Types.expr List.t) =  
-  match exprs with
-  | (Func (name, f)) :: arg_vals -> f arg_vals
-  | (UserFunc (name, arg_names, body, env)) :: arg_vals ->
+and apply (user_func : Types.expr) (arg_vals : Types.expr List.t) = 
+  match user_func with
+  | UserFunc (name, arg_names, body, env) ->
      let func_env = Environment.extend env arg_names arg_vals in
      eval_sequence func_env body 
-  | _ :: arg_vals -> failwith "First elt of list passed to apply is not a function"
-  | [] -> failwith "Empty list passed to apply"
+  | _ -> failwith "First elt of list passed to apply is not a user defined function"
 
 and eval_sequence env (exprs : Types.expr List.t) = 
   match exprs with
@@ -53,3 +47,9 @@ and eval_sequence env (exprs : Types.expr List.t) =
   | some_expr :: other_exprs ->
     let _ = eval env some_expr in 
     eval_sequence env other_exprs
+
+and list_of_values env (pair : Types.expr) : Types.expr List.t =
+  match pair with 
+  | Types.Nill -> []
+  | Types.Pair (hd, tl) -> (eval env hd) :: (list_of_values env tl)
+  | _ -> failwith "Argument list passed to list_of_values is not a proper list"

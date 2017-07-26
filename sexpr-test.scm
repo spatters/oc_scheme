@@ -68,3 +68,8 @@ x
 '()
 (equal? 'x 'x)
 (equal? 'x 'y)
+(list fact fact1 x 'x)
+(quote (1 2 3 4 . 5))
+(quote (1 2 3 4 5))
+(cons 1 (cons 2 3))
+(cons 1 (cons 2 (cons 3 '())))
