@@ -2,7 +2,7 @@
 
 Interpreter for a subset of R5RS scheme written purely to practice using OCaml. 
 
-Lexer and parser are generated using ocamllex and menhir.
+Lexer and parser are generated using ocamllex and menhir, uses jbuilder to build.
 
 To build:
 ```bash
@@ -11,8 +11,8 @@ jbuilder build repl.exe
 
 To run:
 ``` bash
-# Run on a scheme file
-_build/default/repl.exe filename
+# Run on a test scheme file
+_build/default/repl.exe test.scm
 # Run repl
 _build/default/repl.exe 
 ```
