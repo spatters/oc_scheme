@@ -73,3 +73,8 @@ x
 (quote (1 2 3 4 5))
 (cons 1 (cons 2 3))
 (cons 1 (cons 2 (cons 3 '())))
+(define x 3)
+(define (add-x y) (+ x y))
+(add-x 10)
+(define x 4)
+(add-x 10)
